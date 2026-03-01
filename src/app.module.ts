@@ -6,7 +6,7 @@ import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
 
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -26,8 +26,6 @@ import { CommonModule } from './common/common.module';
     ProductsModule,
 
     CommonModule,
-
-    ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [],
   providers: [],
