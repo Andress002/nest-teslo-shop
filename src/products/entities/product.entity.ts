@@ -55,7 +55,7 @@ export class Product {
 
   @OneToMany(() => ProductImage, (productImage) => productImage.product, {
     cascade: true,
-    eager: true,
+    eager: true, //el eager sirve cuando buscas un producto usadno find, findOne etc... typeORM trae automaticamente el arreglo de imagnes
   })
   images?: ProductImage[];
 
