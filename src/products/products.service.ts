@@ -132,7 +132,7 @@ export class ProductsService {
       await queryRunner.manager.save(product);
 
       await queryRunner.commitTransaction();
-      await queryRunner.release();
+      await queryRunner.release(); //cierra conexión.
 
       return this.findOnePlain(id);
       // await this.productRepository.save(product);
@@ -154,6 +154,17 @@ export class ProductsService {
       await this.productRepository.remove(product);
 
       return { message: 'Producto eliminado con exito' };
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('Internal server error');
+    }
+  }
+
+  async deleteAllProducts() {
+    const query = this.productRepository.createQueryBuilder('product');
+
+    try {
+      return await query.delete().where({}).execute();
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException('Internal server error');
