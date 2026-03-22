@@ -31,7 +31,3 @@ export class SeedService {
     return true;
   }
 }
-
-//"quiero transformar un array" → usa map
-
-//"solo quiero ejecutar algo" → usa forEach
