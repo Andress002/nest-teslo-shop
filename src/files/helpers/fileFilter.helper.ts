@@ -9,7 +9,7 @@ export const fileFilter = (
   if (!file) return callback(new Error('File is empty'));
 
   const fileExt: string = file.mimetype.split('/')[1] ?? '';
-  const validExt = ['jpg', 'jpeg', 'png', 'gif'];
+  const validExt: string[] = ['jpg', 'jpeg', 'png', 'gif'];
   if (!validExt.includes(fileExt)) {
     return callback(new BadRequestException('Invalid file type'), false);
   }
