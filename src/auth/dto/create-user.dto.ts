@@ -21,6 +21,8 @@ export class CreateUserDto {
   password!: string;
 
   @IsString()
-  @MinLength(2)
+  @MinLength(5, {
+    message: 'The full name must be at least 5 characters long',
+  })
   fullName!: string;
 }

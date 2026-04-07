@@ -75,7 +75,8 @@ export class AuthService {
       }
 
       return {
-        ...user,
+        message: 'Login successful',
+        email: user.email,
         token: this.getJwtToken({ email: user.email }),
       };
     } catch (error) {
