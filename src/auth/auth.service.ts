@@ -21,17 +21,11 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   async registerUser(createUserDto: CreateUserDto) {
     try {
       const { password, ...data } = createUserDto;
-
-      // const existentUser = await this.userRepository.findOne({
-      //   where: { email: data.email },
-      // });
-
-      // if (existentUser) throw new BadRequestException('Email already exists');
 
       const saltRounds = Number(
         this.configService.getOrThrow<string>('BCRYPT_SALT_ROUNDS'),
@@ -48,7 +42,7 @@ export class AuthService {
 
       return {
         ...user,
-        token: this.getJwtToken({ email: user.email }),
+        token: this.getJwtToken({ id: user.id }),
       };
     } catch (error) {
       this.handleError(error);
@@ -61,7 +55,7 @@ export class AuthService {
     try {
       const user = await this.userRepository.findOne({
         where: { email },
-        select: { email: true, password: true },
+        select: { email: true, password: true, id: true },
       });
 
       if (!user) {
@@ -77,7 +71,7 @@ export class AuthService {
       return {
         message: 'Login successful',
         email: user.email,
-        token: this.getJwtToken({ email: user.email }),
+        token: this.getJwtToken({ id: user.id }),
       };
     } catch (error) {
       if (error instanceof HttpException) {
