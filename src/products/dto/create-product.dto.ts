@@ -12,7 +12,7 @@ import {
 export class CreateProductDto {
   @IsString()
   @MinLength(1)
-  title: string;
+  title!: string;
 
   @IsNumber()
   @IsPositive()
@@ -34,10 +34,10 @@ export class CreateProductDto {
 
   @IsString({ each: true })
   @IsArray()
-  sizes: string[];
+  sizes!: string[];
 
   @IsIn(['men', 'women', 'kid', 'unisex'])
-  gender: string;
+  gender!: string;
 
   @IsString({ each: true }) //el each le esta diciendo que cada elemento dentro del array sea string
   @IsArray()

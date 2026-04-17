@@ -13,6 +13,9 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './interfaces/jwt.payload.interface';
 import { ConfigService } from '@nestjs/config';
+import { LoginResponse } from './interfaces/login-response.interface';
+import { RegisterResponse } from './interfaces/register-response.interface';
+import { ApiResponse } from './interfaces/api-response.interface';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +26,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) { }
 
-  async registerUser(createUserDto: CreateUserDto) {
+  async registerUser(createUserDto: CreateUserDto): Promise<ApiResponse<RegisterResponse>> {
     try {
       const { password, ...data } = createUserDto;
 
@@ -41,15 +44,20 @@ export class AuthService {
       await this.userRepository.save(user);
 
       return {
-        ...user,
-        token: this.getJwtToken({ id: user.id }),
+        message: 'Usuario registrado con exito',
+        data: {
+          email: user.email,
+          fullName: user.fullName,
+          rol: user.roles,
+          token: this.getJwtToken({ id: user.id }),
+        }
       };
     } catch (error) {
-      this.handleError(error);
+      throw this.handleError(error);
     }
   }
 
-  async loginUser(loginUserDto: LoginUserDto) {
+  async loginUser(loginUserDto: LoginUserDto): Promise<ApiResponse<LoginResponse>> {
     const { password, email } = loginUserDto;
 
     try {
@@ -69,9 +77,11 @@ export class AuthService {
       }
 
       return {
-        message: 'Login successful',
-        email: user.email,
-        token: this.getJwtToken({ id: user.id }),
+        message: 'Login exitoso',
+        data: {
+          email: user.email,
+          token: this.getJwtToken({ id: user.id }),
+        }
       };
     } catch (error) {
       if (error instanceof HttpException) {
@@ -97,3 +107,13 @@ export class AuthService {
     throw new InternalServerErrorException('An unexpected error occurred');
   }
 }
+
+
+/* 
+Genérico	           Qué representa
+
+T	                   El objeto completo
+
+K	                   Las propiedades que quieres quitar
+
+*/

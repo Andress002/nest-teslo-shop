@@ -24,7 +24,7 @@ export class ProductsService {
     private readonly productImageRepository: Repository<ProductImage>,
 
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   async create(createProductDto: CreateProductDto) {
     try {
@@ -171,3 +171,22 @@ export class ProductsService {
     }
   }
 }
+
+
+/* 
+type DeepReadonly<T> =
+  T extends object
+    ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
+    : T;
+
+*/
+
+
+/* type DeepRequired<T> = T extends object
+  ? { [K in keyof T]-?: DeepRequired<T[K]> }
+  : T
+
+
+type DeepNonNullable<T> = 
+  T extends object ? {[ K in keyof T ] : DeepNonNullable<NonNullable<T[K]>>} : NonNullable<T>
+ */
