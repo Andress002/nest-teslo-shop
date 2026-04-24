@@ -1,0 +1,24 @@
+import { CallHandler, ExecutionContext, Logger, NestInterceptor } from "@nestjs/common";
+import { Observable, tap } from "rxjs";
+
+
+
+export class LoggingInterceptor implements NestInterceptor {
+  private readonly logger = new Logger('HTTP');
+
+  intercept(context: ExecutionContext, next: CallHandler<any>): Observable<any> | Promise<Observable<any>> {
+    const request = context.switchToHttp().getRequest();
+    const { method, url } = request;
+
+    const now = Date.now();
+
+    return next
+      .handle()
+      .pipe(
+        tap(() => {
+          const delay = Date.now() - now // para ver la diferencia de tiempo
+          this.logger.log(`${method} ${url} ${delay}`)
+        }),
+      );
+  }
+}

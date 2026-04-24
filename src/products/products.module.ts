@@ -12,4 +12,4 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
   imports: [TypeOrmModule.forFeature([Product, ProductImage]), AuthModule],
   exports: [ProductsService, TypeOrmModule],
 })
-export class ProductsModule {}
+export class ProductsModule { }

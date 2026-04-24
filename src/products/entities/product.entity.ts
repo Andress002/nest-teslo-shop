@@ -3,6 +3,7 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   OneToOne,
@@ -67,6 +68,7 @@ export class Product {
     (user) => user.product,
     { onDelete: 'CASCADE' }
   )
+  @JoinColumn({ name: 'userId'})
   user!: User;
 
   @Column('uuid')

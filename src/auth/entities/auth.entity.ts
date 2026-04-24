@@ -32,9 +32,10 @@ export class User {
   isActive!: boolean;
 
   @Column('text', {
-    default: 'user',
+    array: true,
+    default: ['user'],
   })
-  roles!: string[];
+  rol!: string[];
 
   @OneToMany(
     () => Product,

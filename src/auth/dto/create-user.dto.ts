@@ -5,7 +5,11 @@ import {
   Matches,
   MaxLength,
   MinLength,
+  IsArray,
+  IsEnum,
+  IsOptional,
 } from 'class-validator';
+import { UserRole } from '../enums/roles.enum';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -29,4 +33,9 @@ export class CreateUserDto {
     message: 'The full name must be at least 5 characters long',
   })
   fullName!: string;
+
+  @IsArray()
+  @IsEnum(UserRole, { each: true })
+  @IsOptional()
+  rol?: UserRole[];
 }

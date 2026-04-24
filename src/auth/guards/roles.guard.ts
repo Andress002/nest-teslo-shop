@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@
 import { Reflector } from "@nestjs/core";
 import { ROLES_KEY } from "../decorators/roles.decorator";
 import { UserRole } from "../enums/roles.enum";
-import { RequestAuth } from "../interfaces/request.interface";
+import { RequestAuth } from "../../common/interfaces/request.interface";
 
 
 @Injectable()  //CanActivate: que funcionan como filtros de seguridad encargados de decidir si una solicitud HTTP puede acceder a un controlador o ruta específica
@@ -20,17 +20,24 @@ export class RolesGuard implements CanActivate {
       ctx.getClass() //Apunta a la clase del controller //nivel controller (aplica a todos los endpoints dentro)
     ]);
 
-    if (!requiredRoles) return true
+    //Si no hay roles definidos en el endpoint ni en el controlador, se permite el acceso
+    if (!requiredRoles || requiredRoles.length === 0) return true
 
     const { user } = ctx.switchToHttp().getRequest<RequestAuth>();
 
+    if (!user) {
+      throw new ForbiddenException('Usuario no autenticado')
+    }
 
-    const rolExist = requiredRoles.some((role) => user.roles?.includes(role));
+    const hasRole = user.rol.some((role => requiredRoles.includes(role as UserRole)))
 
-    if (!rolExist) {
-      throw new ForbiddenException(`Usuario ${user.fullName} no tiene permisos necesario (${requiredRoles.join(', ')})`)
+
+    if (!hasRole) {
+      throw new ForbiddenException(`El usuario ${user.fullName} no tiene los permisos necesarios.`)
     }
 
     return true
   }
 }
+
+

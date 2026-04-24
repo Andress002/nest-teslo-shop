@@ -11,11 +11,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/auth.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { JwtPayload } from './interfaces/jwt.payload.interface';
+import { JwtPayload } from '../common/interfaces/jwt.payload.interface';
 import { ConfigService } from '@nestjs/config';
-import { LoginResponse } from './interfaces/login-response.interface';
-import { RegisterResponse } from './interfaces/register-response.interface';
-import { ApiResponse } from './interfaces/api-response.interface';
+import { LoginResponse } from '../common/interfaces/login-response.interface';
+import { RegisterResponse } from '../common/interfaces/register-response.interface';
+import { ApiResponse } from '../common/interfaces/api-response.interface';
+import { buildLoginResponse, buildRegisterResponse } from './mappers/auth.mapper';
 
 @Injectable()
 export class AuthService {
@@ -43,15 +44,14 @@ export class AuthService {
 
       await this.userRepository.save(user);
 
+      const token = this.getJwtToken({ id: user.id });
+
       return {
         message: 'Usuario registrado con exito',
-        data: {
-          email: user.email,
-          fullName: user.fullName,
-          rol: user.roles,
-          token: this.getJwtToken({ id: user.id }),
-        }
-      };
+        data: buildRegisterResponse(user, token)
+      }
+
+
     } catch (error) {
       throw this.handleError(error);
     }
@@ -63,7 +63,7 @@ export class AuthService {
     try {
       const user = await this.userRepository.findOne({
         where: { email },
-        select: { email: true, password: true, id: true },
+        select: { email: true, password: true, id: true, fullName: true, rol: true },
       });
 
       if (!user) {
@@ -73,15 +73,14 @@ export class AuthService {
       const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if (!isPasswordValid) {
-        throw new BadRequestException('Password is incorrect');
+        throw new BadRequestException('Invalid credentials');
       }
+
+      const token = this.getJwtToken({ id: user.id })
 
       return {
         message: 'Login exitoso',
-        data: {
-          email: user.email,
-          token: this.getJwtToken({ id: user.id }),
-        }
+        data: buildLoginResponse(user, token)
       };
     } catch (error) {
       if (error instanceof HttpException) {
