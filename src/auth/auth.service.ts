@@ -13,10 +13,9 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from '../common/interfaces/jwt.payload.interface';
 import { ConfigService } from '@nestjs/config';
-import { LoginResponse } from '../common/interfaces/login-response.interface';
-import { RegisterResponse } from '../common/interfaces/register-response.interface';
+import { AuthResponse } from '../common/interfaces/AuthResponse.interface';
 import { ApiResponse } from '../common/interfaces/api-response.interface';
-import { buildLoginResponse, buildRegisterResponse } from './mappers/auth.mapper';
+import { buildAuthResponse } from './mappers/auth.mapper';
 
 @Injectable()
 export class AuthService {
@@ -27,7 +26,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) { }
 
-  async registerUser(createUserDto: CreateUserDto): Promise<ApiResponse<RegisterResponse>> {
+  async registerUser(createUserDto: CreateUserDto): Promise<ApiResponse<AuthResponse>> {
     try {
       const { password, ...data } = createUserDto;
 
@@ -48,7 +47,7 @@ export class AuthService {
 
       return {
         message: 'Usuario registrado con exito',
-        data: buildRegisterResponse(user, token)
+        data: buildAuthResponse(user, token)
       }
 
 
@@ -57,7 +56,7 @@ export class AuthService {
     }
   }
 
-  async loginUser(loginUserDto: LoginUserDto): Promise<ApiResponse<LoginResponse>> {
+  async loginUser(loginUserDto: LoginUserDto): Promise<ApiResponse<AuthResponse>> {
     const { password, email } = loginUserDto;
 
     try {
@@ -80,7 +79,7 @@ export class AuthService {
 
       return {
         message: 'Login exitoso',
-        data: buildLoginResponse(user, token)
+        data: buildAuthResponse(user, token)
       };
     } catch (error) {
       if (error instanceof HttpException) {
@@ -100,7 +99,7 @@ export class AuthService {
   handleError(error: any): never {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (error.code === '23505') {
-      throw new BadRequestException('Email already exists');
+      throw new BadRequestException('Invalid credentials');
     }
     console.log(error);
     throw new InternalServerErrorException('An unexpected error occurred');

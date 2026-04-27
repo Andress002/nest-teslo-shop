@@ -1,6 +1,6 @@
 
 
-export interface LoginResponse {
+export interface AuthResponse {
   fullName: string;
   email: string;
   token: string;
