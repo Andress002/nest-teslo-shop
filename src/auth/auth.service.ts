@@ -31,7 +31,7 @@ export class AuthService {
       const { password, ...data } = createUserDto;
 
       const saltRounds = Number(
-        this.configService.getOrThrow<string>('BCRYPT_SALT_ROUNDS'),
+        this.configService.getOrThrow<number>('BCRYPT_SALT_ROUNDS'),
       );
 
       const hashPassword = await bcrypt.hash(password, saltRounds);

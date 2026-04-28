@@ -9,9 +9,9 @@ export const buildProductResponse = (product: Product): ProductResponse => {
     description: product.description,
     slug: product.slug,
     stock: product.stock,
-    sizes: product.sizes,
+    sizes: product.sizes ?? [],
     gender: product.gender,
-    tags: product.tags,
+    tags: product.tags ?? [],
     images: product.images?.map(img => img.url) ?? [],
   };
 };

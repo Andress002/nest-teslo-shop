@@ -9,6 +9,6 @@ export type ProductResponse = {
   stock?: number;
   sizes: string[];
   gender: string;
-  tags?: string[];
+  tags: string[];
   images: string[]
 }

@@ -37,7 +37,6 @@ export class ProductsService {
       const product = this.productRepository.create({
         ...productDetails,
         user,
-        // userId: user.id,
         images: images.map((image) =>
           this.productImageRepository.create({ url: image }),
         ),
@@ -70,7 +69,7 @@ export class ProductsService {
       }
       return {
         message: 'Productos encontrados con exito',
-        data: products.map(buildProductResponse)
+        data: products.map(product => buildProductResponse(product))
       }
     } catch (error) {
       this.logger.error(error);
@@ -78,7 +77,7 @@ export class ProductsService {
     }
   }
 
-  async findOne(term: string): Promise<Product> {
+  async findOne(term: string): Promise<ApiResponse<ProductResponse>> {
     try {
       let product: Product | null;
 
@@ -105,7 +104,10 @@ export class ProductsService {
         );
       }
 
-      return product;
+      return {
+        message: 'Producto encontrado con exito',
+        data: buildProductResponse(product)
+      }
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException('Internal server error');
@@ -113,8 +115,8 @@ export class ProductsService {
   }
 
   async findOnePlain(term: string): Promise<ProductResponse> {
-    const product = await this.findOne(term);
-    return buildProductResponse(product);
+    const { data } = await this.findOne(term);
+    return data;
   }
 
   async update(id: string, updateProductDto: UpdateProductDto): Promise<ApiResponse<ProductResponse>> {
@@ -147,9 +149,8 @@ export class ProductsService {
 
       return {
         message: 'Producto actualizado con exito',
-        data: buildProductResponse(await this.findOne(id))
+        data: buildProductResponse(product)
       }
-      // await this.productRepository.save(product);
     } catch (error) {
       await queryRunner.rollbackTransaction();
 
@@ -165,13 +166,13 @@ export class ProductsService {
 
   async remove(id: string): Promise<ApiResponse<ProductResponse>> {
     try {
-      const product = await this.findOne(id);
-
-      await this.productRepository.remove(product);
+      const { data: product } = await this.findOne(id);
+      
+      await this.productRepository.delete(id);
 
       return {
         message: 'Producto eliminado con exito',
-        data: buildProductResponse(product)
+        data: product
       }
     } catch (error) {
       this.logger.error(error);
@@ -216,3 +217,6 @@ Tu código funciona, pero para ser un Arquitecto de Software impecable, recuerda
 
 "Entidades para trabajar por dentro, Responses (Mappers) para responder por fuera".
 */
+
+
+//investigar softDelete

@@ -16,7 +16,7 @@ export class LoggingInterceptor implements NestInterceptor {
       .handle()
       .pipe(
         tap(() => {
-          const delay = Date.now() - now // para ver la diferencia de tiempo
+          const delay = Date.now() - now
           this.logger.log(`${method} ${url} ${delay}`)
         }),
       );
