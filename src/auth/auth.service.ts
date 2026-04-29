@@ -14,7 +14,6 @@ import * as bcrypt from 'bcrypt';
 import { JwtPayload } from '../common/interfaces/jwt.payload.interface';
 import { ConfigService } from '@nestjs/config';
 import { AuthResponse } from '../common/interfaces/AuthResponse.interface';
-import { ApiResponse } from '../common/interfaces/api-response.interface';
 import { buildAuthResponse } from './mappers/auth.mapper';
 
 @Injectable()
@@ -26,7 +25,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) { }
 
-  async registerUser(createUserDto: CreateUserDto): Promise<ApiResponse<AuthResponse>> {
+  async registerUser(createUserDto: CreateUserDto): Promise<AuthResponse> {
     try {
       const { password, ...data } = createUserDto;
 
@@ -45,18 +44,18 @@ export class AuthService {
 
       const token = this.getJwtToken({ id: user.id });
 
-      return {
-        message: 'Usuario registrado con exito',
-        data: buildAuthResponse(user, token)
-      }
-
+      return buildAuthResponse(user, token)  
 
     } catch (error) {
-      throw this.handleError(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      console.error(error);
+      throw new InternalServerErrorException('An unexpected error occurred');
     }
   }
 
-  async loginUser(loginUserDto: LoginUserDto): Promise<ApiResponse<AuthResponse>> {
+  async loginUser(loginUserDto: LoginUserDto): Promise<AuthResponse> {
     const { password, email } = loginUserDto;
 
     try {
@@ -77,10 +76,8 @@ export class AuthService {
 
       const token = this.getJwtToken({ id: user.id })
 
-      return {
-        message: 'Login exitoso',
-        data: buildAuthResponse(user, token)
-      };
+      return buildAuthResponse(user, token)
+      
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -97,7 +94,7 @@ export class AuthService {
   }
 
   handleError(error: any): never {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access 
     if (error.code === '23505') {
       throw new BadRequestException('Invalid credentials');
     }

@@ -31,7 +31,7 @@ export class ProductsService {
     private readonly dataSource: DataSource,
   ) { }
 
-  async create(createProductDto: CreateProductDto, user: User): Promise<ApiResponse<ProductResponse>> {
+  async create(createProductDto: CreateProductDto, user: User): Promise<ProductResponse> {
     try {
       const { images = [], ...productDetails } = createProductDto;
       const product = this.productRepository.create({
@@ -43,10 +43,8 @@ export class ProductsService {
       });
       await this.productRepository.save(product);
 
-      return {
-        message: 'Producto creado con exito',
-        data: buildProductResponse(product)
-      }
+      return buildProductResponse(product)
+
 
     } catch (error) {
       this.logger.error(error);
@@ -54,7 +52,7 @@ export class ProductsService {
     }
   }
 
-  async findAll(pagination: PaginationDto): Promise<ApiResponse<ProductResponse[]>> {
+  async findAll(pagination: PaginationDto): Promise<ProductResponse[]> {
     try {
       const { limit = 10, offset = 0 } = pagination;
       const products = await this.productRepository.find({
@@ -64,23 +62,21 @@ export class ProductsService {
           images: true,
         },
       });
-      if (!products) {
+      if (products.length === 0) {
         throw new BadRequestException('productos no encontrados');
       }
-      return {
-        message: 'Productos encontrados con exito',
-        data: products.map(product => buildProductResponse(product))
-      }
+      return products.map(product => buildProductResponse(product))
+      
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException('Internal server error');
     }
   }
 
-  async findOne(term: string): Promise<ApiResponse<ProductResponse>> {
+  async findOne(term: string): Promise<ProductResponse> {
     try {
       let product: Product | null;
-
+ 
       if (isUUID(term)) {
         product = await this.productRepository.findOne({
           where: { id: term },
@@ -104,10 +100,8 @@ export class ProductsService {
         );
       }
 
-      return {
-        message: 'Producto encontrado con exito',
-        data: buildProductResponse(product)
-      }
+      return buildProductResponse(product)
+      
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException('Internal server error');
@@ -115,11 +109,11 @@ export class ProductsService {
   }
 
   async findOnePlain(term: string): Promise<ProductResponse> {
-    const { data } = await this.findOne(term);
-    return data;
+    const product = await this.findOne(term);
+    return product;
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto): Promise<ApiResponse<ProductResponse>> {
+  async update(id: string, updateProductDto: UpdateProductDto): Promise<ProductResponse> {
     const { images, ...toUpdate } = updateProductDto;
 
     const product = await this.productRepository.preload({
@@ -147,10 +141,8 @@ export class ProductsService {
 
       await queryRunner.commitTransaction();
 
-      return {
-        message: 'Producto actualizado con exito',
-        data: buildProductResponse(product)
-      }
+      return buildProductResponse(product)
+      
     } catch (error) {
       await queryRunner.rollbackTransaction();
 
@@ -164,16 +156,13 @@ export class ProductsService {
     }
   }
 
-  async remove(id: string): Promise<ApiResponse<ProductResponse>> {
+  async remove(id: string): Promise<ProductResponse> {
     try {
-      const { data: product } = await this.findOne(id);
+      const product = await this.findOne(id);
       
       await this.productRepository.delete(id);
 
-      return {
-        message: 'Producto eliminado con exito',
-        data: product
-      }
+      return product
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException('Internal server error');
