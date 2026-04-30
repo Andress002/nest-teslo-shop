@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { LoggingInterceptor } from './common/interceptor/logger.interceptor';
+import { ZodValidationPipe } from 'nestjs-zod';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,10 +12,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('/api');
   app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      forbidNonWhitelisted: true,
-    }),
+    new ZodValidationPipe()
   );
 
   await app.listen(process.env.PORT ?? 3005);

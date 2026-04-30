@@ -14,7 +14,6 @@ import { validate as isUUID } from 'uuid';
 import { ProductImage, Product } from './entities';
 import { ProductResponse } from 'src/types/ProductResponse';
 import { buildProductResponse } from './mappers/product.mapper';
-import { ApiResponse } from 'src/common/interfaces/api-response.interface';
 
 import { User } from 'src/auth/entities/auth.entity';
 
@@ -101,7 +100,6 @@ export class ProductsService {
       }
 
       return buildProductResponse(product)
-      
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException('Internal server error');

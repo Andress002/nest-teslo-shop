@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto, LoginUserDto } from './dto';
+import { RegisterUserDto, LoginUserDto } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/auth.entity';
 import { Repository } from 'typeorm';
@@ -25,9 +25,9 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) { }
 
-  async registerUser(createUserDto: CreateUserDto): Promise<AuthResponse> {
+  async registerUser(registerUserDto: RegisterUserDto): Promise<AuthResponse> {
     try {
-      const { password, ...data } = createUserDto;
+      const { password, ...data } = registerUserDto;
 
       const saltRounds = Number(
         this.configService.getOrThrow<number>('BCRYPT_SALT_ROUNDS'),
