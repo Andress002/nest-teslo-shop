@@ -12,6 +12,10 @@ import { DataSource, Repository } from 'typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { validate as isUUID } from 'uuid';
 import { ProductImage, Product } from './entities';
+import { ProductResponse } from 'src/types/ProductResponse';
+import { buildProductResponse } from './mappers/product.mapper';
+
+import { User } from 'src/auth/entities/auth.entity';
 
 @Injectable()
 export class ProductsService {
@@ -24,26 +28,30 @@ export class ProductsService {
     private readonly productImageRepository: Repository<ProductImage>,
 
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto, user: User): Promise<ProductResponse> {
     try {
       const { images = [], ...productDetails } = createProductDto;
       const product = this.productRepository.create({
         ...productDetails,
+        user,
         images: images.map((image) =>
           this.productImageRepository.create({ url: image }),
         ),
       });
       await this.productRepository.save(product);
-      return { ...product, images: images };
+
+      return buildProductResponse(product)
+
+
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException('Internal server error');
     }
   }
 
-  async findAll(pagination: PaginationDto) {
+  async findAll(pagination: PaginationDto): Promise<ProductResponse[]> {
     try {
       const { limit = 10, offset = 0 } = pagination;
       const products = await this.productRepository.find({
@@ -53,25 +61,26 @@ export class ProductsService {
           images: true,
         },
       });
-      if (!products) {
+      if (products.length === 0) {
         throw new BadRequestException('productos no encontrados');
       }
-      return products.map((product) => ({
-        ...product,
-        images: product.images?.map((img) => img.url),
-      }));
+      return products.map(product => buildProductResponse(product))
+      
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException('Internal server error');
     }
   }
 
-  async findOne(term: string) {
+  async findOne(term: string): Promise<ProductResponse> {
     try {
       let product: Product | null;
-
+ 
       if (isUUID(term)) {
-        product = await this.productRepository.findOneBy({ id: term });
+        product = await this.productRepository.findOne({
+          where: { id: term },
+          relations: ['images'],
+        });
       } else {
         const queryBuilder = this.productRepository.createQueryBuilder('prod');
         product = await queryBuilder
@@ -90,22 +99,19 @@ export class ProductsService {
         );
       }
 
-      return product;
+      return buildProductResponse(product)
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException('Internal server error');
     }
   }
 
-  async findOnePlain(term: string) {
-    const { images = [], ...rest } = await this.findOne(term);
-    return {
-      ...rest,
-      images: images.map((image) => image.url),
-    };
+  async findOnePlain(term: string): Promise<ProductResponse> {
+    const product = await this.findOne(term);
+    return product;
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
+  async update(id: string, updateProductDto: UpdateProductDto): Promise<ProductResponse> {
     const { images, ...toUpdate } = updateProductDto;
 
     const product = await this.productRepository.preload({
@@ -123,37 +129,38 @@ export class ProductsService {
     try {
       if (images) {
         await queryRunner.manager.delete(ProductImage, { product: { id } });
-
+ 
         product.images = images.map((image) =>
-          this.productImageRepository.create({ url: image }),
+          queryRunner.manager.create(ProductImage, { url: image }),
         );
       }
 
       await queryRunner.manager.save(product);
 
       await queryRunner.commitTransaction();
-      await queryRunner.release(); //cierra conexión.
 
-      return this.findOnePlain(id);
-      // await this.productRepository.save(product);
+      return buildProductResponse(product)
+      
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      await queryRunner.release();
 
       this.logger.error(error);
       throw new InternalServerErrorException(
         'Error actualizando el producto, revisa los log',
       );
     }
+    finally {
+      await queryRunner.release(); //cierra conexion.
+    }
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<ProductResponse> {
     try {
       const product = await this.findOne(id);
+      
+      await this.productRepository.delete(id);
 
-      await this.productRepository.remove(product);
-
-      return { message: 'Producto eliminado con exito' };
+      return product
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException('Internal server error');
@@ -171,3 +178,32 @@ export class ProductsService {
     }
   }
 }
+
+
+/* 
+type DeepReadonly<T> =
+  T extends object
+    ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
+    : T;
+
+*/
+
+
+/* type DeepRequired<T> = T extends object
+  ? { [K in keyof T]-?: DeepRequired<T[K]> }
+  : T
+
+
+type DeepNonNullable<T> = 
+  T extends object ? {[ K in keyof T ] : DeepNonNullable<NonNullable<T[K]>>} : NonNullable<T>
+ */
+
+
+/* 
+Tu código funciona, pero para ser un Arquitecto de Software impecable, recuerda:
+
+"Entidades para trabajar por dentro, Responses (Mappers) para responder por fuera".
+*/
+
+
+//investigar softDelete

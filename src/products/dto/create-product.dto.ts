@@ -1,51 +1,7 @@
-import {
-  IsArray,
-  IsIn,
-  IsInt,
-  IsNumber,
-  IsOptional,
-  IsPositive,
-  IsString,
-  MinLength,
-} from 'class-validator';
+import { createZodDto } from "nestjs-zod";
+import { CreateProductSchema } from "../schemas/products-schemas";
 
-export class CreateProductDto {
-  @IsString()
-  @MinLength(1)
-  title: string;
 
-  @IsNumber()
-  @IsPositive()
-  @IsOptional()
-  price?: number;
 
-  @IsString()
-  @IsOptional()
-  description?: string;
 
-  @IsString()
-  @IsOptional()
-  slug?: string;
-
-  @IsInt()
-  @IsPositive()
-  @IsOptional()
-  stock?: number;
-
-  @IsString({ each: true })
-  @IsArray()
-  sizes: string[];
-
-  @IsIn(['men', 'women', 'kid', 'unisex'])
-  gender: string;
-
-  @IsString({ each: true }) //el each le esta diciendo que cada elemento dentro del array sea string
-  @IsArray()
-  @IsOptional()
-  tags?: string[];
-
-  @IsString({ each: true })
-  @IsArray()
-  @IsOptional()
-  images?: string[];
-}
+export class CreateProductDto extends createZodDto(CreateProductSchema) {}

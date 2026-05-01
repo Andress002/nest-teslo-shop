@@ -4,13 +4,13 @@ import { Product } from './product.entity';
 @Entity({ name: 'product_images' })
 export class ProductImage {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column('text')
-  url: string;
+  url!: string;
 
   @ManyToOne(() => Product, (product) => product.images, {
     onDelete: 'CASCADE',
   })
-  product: Product;
+  product!: Product;
 }
