@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -28,9 +29,12 @@ export class ProductsService {
     private readonly productImageRepository: Repository<ProductImage>,
 
     private readonly dataSource: DataSource,
-  ) { }
+  ) {}
 
-  async create(createProductDto: CreateProductDto, user: User): Promise<ProductResponse> {
+  async create(
+    createProductDto: CreateProductDto,
+    user: User,
+  ): Promise<ProductResponse> {
     try {
       const { images = [], ...productDetails } = createProductDto;
       const product = this.productRepository.create({
@@ -42,12 +46,9 @@ export class ProductsService {
       });
       await this.productRepository.save(product);
 
-      return buildProductResponse(product)
-
-
+      return buildProductResponse(product);
     } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException('Internal server error');
+      this.handleServiceError(error);
     }
   }
 
@@ -64,18 +65,16 @@ export class ProductsService {
       if (products.length === 0) {
         throw new BadRequestException('productos no encontrados');
       }
-      return products.map(product => buildProductResponse(product))
-      
+      return products.map((product) => buildProductResponse(product));
     } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException('Internal server error');
+      this.handleServiceError(error);
     }
   }
 
   async findOne(term: string): Promise<ProductResponse> {
     try {
       let product: Product | null;
- 
+
       if (isUUID(term)) {
         product = await this.productRepository.findOne({
           where: { id: term },
@@ -99,10 +98,9 @@ export class ProductsService {
         );
       }
 
-      return buildProductResponse(product)
+      return buildProductResponse(product);
     } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException('Internal server error');
+      this.handleServiceError(error);
     }
   }
 
@@ -111,7 +109,10 @@ export class ProductsService {
     return product;
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto): Promise<ProductResponse> {
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+  ): Promise<ProductResponse> {
     const { images, ...toUpdate } = updateProductDto;
 
     const product = await this.productRepository.preload({
@@ -129,7 +130,7 @@ export class ProductsService {
     try {
       if (images) {
         await queryRunner.manager.delete(ProductImage, { product: { id } });
- 
+
         product.images = images.map((image) =>
           queryRunner.manager.create(ProductImage, { url: image }),
         );
@@ -139,17 +140,14 @@ export class ProductsService {
 
       await queryRunner.commitTransaction();
 
-      return buildProductResponse(product)
-      
+      return buildProductResponse(product);
     } catch (error) {
       await queryRunner.rollbackTransaction();
-
-      this.logger.error(error);
-      throw new InternalServerErrorException(
+      this.handleServiceError(
+        error,
         'Error actualizando el producto, revisa los log',
       );
-    }
-    finally {
+    } finally {
       await queryRunner.release(); //cierra conexion.
     }
   }
@@ -157,13 +155,12 @@ export class ProductsService {
   async remove(id: string): Promise<ProductResponse> {
     try {
       const product = await this.findOne(id);
-      
+
       await this.productRepository.delete(id);
 
-      return product
+      return product;
     } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException('Internal server error');
+      this.handleServiceError(error);
     }
   }
 
@@ -173,14 +170,23 @@ export class ProductsService {
     try {
       return await query.delete().where({}).execute();
     } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException('Internal server error');
+      this.handleServiceError(error);
     }
+  }
+
+  private handleServiceError(
+    error: unknown,
+    message = 'Internal server error',
+  ): never {
+    if (error instanceof HttpException) {
+      throw error;
+    }
+    this.logger.error(error);
+    throw new InternalServerErrorException(message);
   }
 }
 
-
-/* 
+/*
 type DeepReadonly<T> =
   T extends object
     ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
@@ -188,22 +194,19 @@ type DeepReadonly<T> =
 
 */
 
-
 /* type DeepRequired<T> = T extends object
   ? { [K in keyof T]-?: DeepRequired<T[K]> }
   : T
 
 
-type DeepNonNullable<T> = 
+type DeepNonNullable<T> =
   T extends object ? {[ K in keyof T ] : DeepNonNullable<NonNullable<T[K]>>} : NonNullable<T>
  */
 
-
-/* 
+/*
 Tu código funciona, pero para ser un Arquitecto de Software impecable, recuerda:
 
 "Entidades para trabajar por dentro, Responses (Mappers) para responder por fuera".
 */
-
 
 //investigar softDelete

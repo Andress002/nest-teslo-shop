@@ -31,10 +31,7 @@ export class ProductsController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @Message('Producto creado exitosamente')
-  create(
-    @Body() createProductDto: CreateProductDto,
-    @GetUser() user: User,
-  ) {
+  create(@Body() createProductDto: CreateProductDto, @GetUser() user: User) {
     return this.productsService.create(createProductDto, user);
   }
 
