@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   HttpException,
   Injectable,
   InternalServerErrorException,
@@ -23,7 +24,7 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   async registerUser(registerUserDto: RegisterUserDto): Promise<AuthResponse> {
     try {
@@ -43,15 +44,13 @@ export class AuthService {
       await this.userRepository.save(user);
 
       const token = this.getJwtToken({ id: user.id });
-
-      return buildAuthResponse(user, token)  
+      return buildAuthResponse(user, token);
 
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
-      console.error(error);
-      throw new InternalServerErrorException('An unexpected error occurred');
+      this.handleError(error);
     }
   }
 
@@ -74,41 +73,35 @@ export class AuthService {
         throw new BadRequestException('Invalid credentials');
       }
 
-      const token = this.getJwtToken({ id: user.id })
+      const token = this.getJwtToken({ id: user.id });
 
-      return buildAuthResponse(user, token)
-      
+      return buildAuthResponse(user, token);
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
-
-      console.error(error);
-      throw new InternalServerErrorException('An unexpected error occurred');
+      this.handleError(error);
     }
   }
 
   private getJwtToken(payload: JwtPayload) {
-    const token = this.jwtService.sign(payload);
-    return token;
+    return this.jwtService.sign(payload);
   }
 
-  handleError(error: any): never {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access 
-    if (error.code === '23505') {
-      throw new BadRequestException('Invalid credentials');
+  private handleError(error: unknown): never {
+    if (this.hasErrorCode(error) && error.code === '23505') {
+      throw new ConflictException('Email already exists');
     }
-    console.log(error);
+    console.error(error);
     throw new InternalServerErrorException('An unexpected error occurred');
   }
+
+  private hasErrorCode(error: unknown): error is { code: string } {
+    return (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      typeof (error as { code: unknown }).code === 'string'
+    );
+  }
 }
-
-
-/* 
-Genérico	           Qué representa
-
-T	                   El objeto completo
-
-K	                   Las propiedades que quieres quitar
-
-*/
