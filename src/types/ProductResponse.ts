@@ -1,5 +1,3 @@
-
-
 export type ProductResponse = {
   id: string;
   title: string;
@@ -10,5 +8,5 @@ export type ProductResponse = {
   sizes: string[];
   gender: string;
   tags: string[];
-  images: string[]
-}
+  images: string[];
+};

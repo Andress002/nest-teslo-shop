@@ -1,6 +1,5 @@
-import { Request } from "express";
-import { UserRole } from "../../auth/enums/roles.enum";
-
+import { Request } from 'express';
+import { UserRole } from '../../auth/enums/roles.enum';
 
 export interface RequestAuth extends Request {
   user: {
@@ -9,5 +8,5 @@ export interface RequestAuth extends Request {
     fullName: string;
     rol: UserRole[];
     token: string;
-  }
+  };
 }

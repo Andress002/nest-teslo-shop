@@ -1,5 +1,5 @@
-import { Product } from "src/products/entities";
-import { ProductResponse } from "src/types/ProductResponse";
+import { Product } from 'src/products/entities';
+import { ProductResponse } from 'src/types/ProductResponse';
 
 export const buildProductResponse = (product: Product): ProductResponse => {
   return {
@@ -12,6 +12,6 @@ export const buildProductResponse = (product: Product): ProductResponse => {
     sizes: product.sizes ?? [],
     gender: product.gender,
     tags: product.tags ?? [],
-    images: product.images?.map(img => img.url) ?? [],
+    images: product.images?.map((img) => img.url) ?? [],
   };
 };

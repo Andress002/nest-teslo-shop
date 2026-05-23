@@ -28,7 +28,7 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post('create')
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @UseGuards(AuthGuard('jwt'), RolesGuard) // siempre debe ir del AuthGuard para que funcionen
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @Message('Producto creado exitosamente')
   create(@Body() createProductDto: CreateProductDto, @GetUser() user: User) {
@@ -36,7 +36,7 @@ export class ProductsController {
   }
 
   @Get('get-all')
-  @Message('Productos encontrados con exito')
+  @Message('Productos encontrados exitosamente')
   findAll(@Query() paginationDto: PaginationDto) {
     return this.productsService.findAll(paginationDto);
   }
