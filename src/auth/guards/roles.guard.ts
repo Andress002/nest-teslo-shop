@@ -1,10 +1,11 @@
+import { Reflector } from '@nestjs/core';
 import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { UserRole } from '../enums/roles.enum';
 import { RequestAuth } from '../../common/interfaces/request.interface';
@@ -20,26 +21,28 @@ export class RolesGuard implements CanActivate {
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
       ROLES_KEY,
       [
-        ctx.getHandler(), //Apunta al método del controller que maneja la request // nivel endpoint (aplica al metodo del controller)
-        ctx.getClass(), //Apunta a la clase del controller //nivel controller (aplica a todos los endpoints dentro)
+        ctx.getHandler(), // Nivel de metodo (aplica a un endpoint específico)
+        ctx.getClass(), // Nivel de controlador (aplica a todos los endpoints del controlador)
       ],
     );
 
     //Si no hay roles definidos en el endpoint ni en el controlador, se permite el acceso
     if (!requiredRoles || requiredRoles.length === 0) return true;
 
-    const { user } = ctx.switchToHttp().getRequest<RequestAuth>();
-    const { rol } = user;
+    const request = ctx.switchToHttp().getRequest<RequestAuth>();
+    const user = request.user;
 
     if (!user) {
-      throw new ForbiddenException('Usuario no autenticado');
+      throw new UnauthorizedException('Usuario no autenticado en la peticion.');
     }
+
+    const { rol, fullName } = user;
 
     const hasRole = rol.some((role) => requiredRoles.includes(role));
 
     if (!hasRole) {
       throw new ForbiddenException(
-        `El usuario ${user.fullName} no tiene los permisos necesarios.`,
+        `El usuario ${fullName} no tiene los permisos necesarios.`,
       );
     }
 
