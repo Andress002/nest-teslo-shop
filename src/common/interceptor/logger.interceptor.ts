@@ -1,19 +1,22 @@
 import {
   CallHandler,
   ExecutionContext,
+  Injectable,
   Logger,
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
 import { RequestAuth } from '../interfaces/request.interface';
 
-export class LoggingInterceptor implements NestInterceptor {
+@Injectable()
+//se agrega <T, T> por que data entra como T y sale como T, si se quisiera transformar a otro tipo se pondria <T, R> por ejemplo
+export class LoggingInterceptor<T> implements NestInterceptor<T, T> {
   private readonly logger = new Logger('HTTP');
 
   intercept(
     context: ExecutionContext,
-    next: CallHandler<any>,
-  ): Observable<any> | Promise<Observable<any>> {
+    next: CallHandler<T>,
+  ): Observable<T> | Promise<Observable<T>> {
     const request = context
       .switchToHttp()
       .getRequest<Omit<RequestAuth, 'user'>>();

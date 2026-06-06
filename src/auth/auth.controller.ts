@@ -32,11 +32,11 @@ export class AuthController {
   }
 
   @Get('private')
+  @Message('Ruta privada, Solo de testeo')
   @UseGuards(AuthGuard('jwt'))
   testingPrivateRoute(@GetUser() user: User) {
     return {
       ok: true,
-      message: 'Hola mundo private',
       user,
     };
   }

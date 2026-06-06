@@ -37,10 +37,7 @@ export class User {
   })
   rol!: string[];
 
-  @OneToMany(
-    () => Product,
-    (product) => product.user
-  )
+  @OneToMany(() => Product, (product) => product.user)
   product!: Product[];
 
   @BeforeInsert()

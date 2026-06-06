@@ -4,8 +4,8 @@ export const LoginUserSchema = z
   .object({
     email: z
       .string()
-      .email({ message: 'Invalid email format' })
-      .min(1, { message: 'Email is required' }),
+      .min(1, { message: 'Email is required' })
+      .email({ message: 'Invalid email format' }),
     password: z
       .string()
       .min(6, { message: 'The password must be at least 6 characters long' })

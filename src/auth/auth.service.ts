@@ -45,7 +45,6 @@ export class AuthService {
 
       const token = this.getJwtToken({ id: user.id });
       return buildAuthResponse(user, token);
-
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -60,7 +59,13 @@ export class AuthService {
     try {
       const user = await this.userRepository.findOne({
         where: { email },
-        select: { email: true, password: true, id: true, fullName: true, rol: true },
+        select: {
+          email: true,
+          password: true,
+          id: true,
+          fullName: true,
+          rol: true,
+        },
       });
 
       if (!user) {
