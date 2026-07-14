@@ -25,10 +25,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
 
-      - name: Instalando pnpm
-        run: npm install -g pnpm
+      - name: Habilitando pnpm via Corepack
+        run: corepack enable
 
       - name: Instalando librerias con pnpm
         run: pnpm install --frozen-lockfile
