@@ -26,8 +26,8 @@ jobs:
 
       # Paso C: Instalar las dependencias de tu proyecto
       - name: Instalando librerias
-        run: npm install
+        run: pnpm install
 
       # Paso D: Correr los tests o revisiones
       - name: Ejecutando pruebas automatizadas
-        run: npm test
+        run: pnpm test
