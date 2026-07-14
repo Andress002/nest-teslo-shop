@@ -24,14 +24,13 @@ jobs:
       - name: Instalando pnpm
         run: npm install -g pnpm
 
-      # 3. PASO DE SEGURIDAD DEVOPS: 
-      # Eliminamos archivos fantasmas de workspace si existen, ya que causan el error en pipelines
+      # 3. Limpieza preventiva de workspace alternos
       - name: Limpieza preventiva de workspace alternos
         run: rm -f pnpm-workspace.yaml
 
-      # 4. Instalamos las dependencias ignorando bloqueos estrictos de versión de lockfile
+      # 4. CORRECCIÓN AQUÍ: Instalamos permitiendo que bcrypt ejecute su script de compilación
       - name: Instalando librerias con pnpm
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile --only-built-dependencies=bcrypt
 
       # 5. Compilamos el backend de NestJS
       - name: Compilando el proyecto (Nest Build)
