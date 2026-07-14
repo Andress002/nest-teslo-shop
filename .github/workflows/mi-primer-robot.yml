@@ -1,0 +1,33 @@
+# 1. El nombre de tu automatización
+name: Verificacion de Codigo
+
+# 2. ¿CUÁNDO se ejecuta? (El disparador)
+on:
+  push:
+    branches: [ main ] # Se activa cada vez que haces 'git push' a la rama main
+
+# 3. ¿QUÉ va a hacer? (La lista de tareas)
+jobs:
+  control-calidad:
+    # Le pedimos a GitHub que nos preste una computadora virtual con Linux (Ubuntu)
+    runs-on: ubuntu-latest
+
+    # Los pasos que ejecutará esa computadora en orden:
+    steps:
+      # Paso A: Clonar tu código dentro de la máquina virtual
+      - name: Copiando el codigo del repositorio
+        uses: actions/checkout@v4
+
+      # Paso B: Instalar Node.js en esa máquina virtual
+      - name: Instalando Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Paso C: Instalar las dependencias de tu proyecto
+      - name: Instalando librerias
+        run: npm install
+
+      # Paso D: Correr los tests o revisiones
+      - name: Ejecutando pruebas automatizadas
+        run: npm test

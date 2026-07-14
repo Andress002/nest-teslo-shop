@@ -63,13 +63,15 @@ export class Product {
   })
   images?: ProductImage[];
 
+
   @ManyToOne(
     () => User,
     (user) => user.product,
     { onDelete: 'CASCADE' }
   )
-  @JoinColumn({ name: 'userId'})
+  @JoinColumn({ name: 'userId' })
   user!: User;
+
 
   @Column('uuid')
   userId!: string;

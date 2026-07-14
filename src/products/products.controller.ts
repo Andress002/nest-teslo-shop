@@ -25,7 +25,7 @@ import { Message } from 'src/auth/decorators/message.decorator';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService) { }
 
   @Post('create')
   @UseGuards(AuthGuard('jwt'), RolesGuard) // siempre debe ir del AuthGuard para que funcionen
@@ -53,8 +53,9 @@ export class ProductsController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateProductDto: UpdateProductDto,
+    @GetUser() user: User
   ) {
-    return this.productsService.update(id, updateProductDto);
+    return this.productsService.update(id, updateProductDto, user);
   }
 
   @Delete(':id')

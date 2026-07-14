@@ -16,7 +16,7 @@ import { LoginUserDto, RegisterUserDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('register')
   @Message('Usuario registrado con exito')
@@ -29,6 +29,13 @@ export class AuthController {
   @HttpCode(HttpStatus.ACCEPTED)
   login(@Body() loginUserDto: LoginUserDto) {
     return this.authService.loginUser(loginUserDto);
+  }
+
+  @Get('check-auth-status')
+  @Message('Check auth status')
+  @UseGuards(AuthGuard('jwt'))
+  checkAuthStatus(@GetUser() user: User) {
+    return this.authService.checkAuthStatus(user);
   }
 
   @Get('private')

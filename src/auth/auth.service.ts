@@ -24,7 +24,7 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   async registerUser(registerUserDto: RegisterUserDto): Promise<AuthResponse> {
     try {
@@ -86,6 +86,13 @@ export class AuthService {
         throw error;
       }
       this.handleError(error);
+    }
+  }
+
+  async checkAuthStatus(user: User) {
+    return {
+      ...user,
+      token: this.getJwtToken({ id: user.id })
     }
   }
 
