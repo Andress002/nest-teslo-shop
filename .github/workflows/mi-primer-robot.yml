@@ -14,20 +14,19 @@ jobs:
       - name: Copiando el codigo del repositorio
         uses: actions/checkout@v4
 
-      # 1. Necesitamos instalar pnpm antes de configurar Node.js
-      - name: Instalando pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9 # Ajusta a la versión de pnpm que uses (8 o 9)
-
-      # 2. Configuramos Node.js y le decimos que use la caché de pnpm
+      # 1. Configuramos Node.js primero (sin caché automática para evitar el bug)
       - name: Instalando Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'pnpm'
+          node-version: 22
 
-      # 3. Instalamos las dependencias usando pnpm de forma estricta (equivalente a npm ci)
+      # 2. Instalamos pnpm
+      - name: Instalando pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      # 3. Instalamos las dependencias
       - name: Instalando librerias con pnpm
         run: pnpm install --frozen-lockfile
 
