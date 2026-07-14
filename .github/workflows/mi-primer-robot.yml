@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   control-calidad:
     runs-on: ubuntu-latest
@@ -14,28 +21,26 @@ jobs:
       - name: Copiando el codigo del repositorio
         uses: actions/checkout@v4
 
-      # 1. Configuramos Node.js primero
       - name: Instalando Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'pnpm'
 
-      # 2. Instalamos pnpm de forma global
       - name: Instalando pnpm
         run: npm install -g pnpm
 
-      # 3. Limpieza preventiva de workspace alternos
-      - name: Limpieza preventiva de workspace alternos
-        run: rm -f pnpm-workspace.yaml
-
-      # 4. CORRECCIÓN AQUÍ: Instalamos permitiendo que bcrypt ejecute su script de compilación
       - name: Instalando librerias con pnpm
-        run: pnpm install --no-frozen-lockfile --only-built-dependencies=bcrypt
+        run: pnpm install --frozen-lockfile
 
-      # 5. Compilamos el backend de NestJS
+      - name: Verificando codigo con ESLint
+        run: pnpm lint
+
       - name: Compilando el proyecto (Nest Build)
         run: pnpm build
 
-      # 6. Ejecutamos las pruebas unitarias
       - name: Ejecutando pruebas unitarias
         run: pnpm test
+
+      - name: Ejecutando pruebas e2e
+        run: pnpm test:e2e
