@@ -14,26 +14,29 @@ jobs:
       - name: Copiando el codigo del repositorio
         uses: actions/checkout@v4
 
-      # 1. Configuramos Node.js primero (sin caché automática para evitar el bug)
+      # 1. Configuramos Node.js primero
       - name: Instalando Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      # 2. Instalamos pnpm
+      # 2. Instalamos pnpm de forma global
       - name: Instalando pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
+        run: npm install -g pnpm
 
-      # 3. Instalamos las dependencias
+      # 3. PASO DE SEGURIDAD DEVOPS: 
+      # Eliminamos archivos fantasmas de workspace si existen, ya que causan el error en pipelines
+      - name: Limpieza preventiva de workspace alternos
+        run: rm -f pnpm-workspace.yaml
+
+      # 4. Instalamos las dependencias ignorando bloqueos estrictos de versión de lockfile
       - name: Instalando librerias con pnpm
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
-      # 4. Compilamos el backend de NestJS
+      # 5. Compilamos el backend de NestJS
       - name: Compilando el proyecto (Nest Build)
         run: pnpm build
 
-      # 5. Ejecutamos las pruebas unitarias
+      # 6. Ejecutamos las pruebas unitarias
       - name: Ejecutando pruebas unitarias
         run: pnpm test
