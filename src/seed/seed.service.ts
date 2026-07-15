@@ -12,13 +12,13 @@ export class SeedService {
     private readonly productService: ProductsService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) { }
+  ) {}
 
   async rundSeed() {
     await this.deleteTables();
     const adminUser = await this.insertUsers();
     await this.insertNewProducts(adminUser);
-    return
+    return;
   }
 
   private async deleteTables() {
@@ -34,8 +34,8 @@ export class SeedService {
         password: 'Password1!',
         fullName: 'Test User',
         isActive: true,
-        rol: ['admin'] // Note: user.rol is now an array in your DB!
-      }
+        rol: ['admin'], // Note: user.rol is now an array in your DB!
+      },
     ];
 
     const dbUsers: User[] = [];
@@ -44,7 +44,7 @@ export class SeedService {
         this.userRepository.create({
           ...user,
           password: bcrypt.hashSync(user.password, 10),
-        })
+        }),
       );
     }
     await this.userRepository.save(dbUsers);

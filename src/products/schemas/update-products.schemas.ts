@@ -1,6 +1,3 @@
-
-import { CreateProductSchema } from "./products-schemas";
-
-
+import { CreateProductSchema } from './products-schemas';
 
 export const UpdateProductSchema = CreateProductSchema.partial();

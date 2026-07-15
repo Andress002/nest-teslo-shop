@@ -29,7 +29,7 @@ export class ProductsService {
     private readonly productImageRepository: Repository<ProductImage>,
 
     private readonly dataSource: DataSource,
-  ) { }
+  ) {}
 
   async create(
     createProductDto: CreateProductDto,
@@ -40,7 +40,9 @@ export class ProductsService {
       const product = this.productRepository.create({
         ...productDetails,
         user,
-        images: images.map((image) => this.productImageRepository.create({ url: image })),
+        images: images.map((image) =>
+          this.productImageRepository.create({ url: image }),
+        ),
       });
       await this.productRepository.save(product);
 
@@ -110,7 +112,7 @@ export class ProductsService {
   async update(
     id: string,
     updateProductDto: UpdateProductDto,
-    user: User
+    user: User,
   ): Promise<ProductResponse> {
     const { images, ...toUpdate } = updateProductDto;
 

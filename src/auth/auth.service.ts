@@ -24,7 +24,7 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   async registerUser(registerUserDto: RegisterUserDto): Promise<AuthResponse> {
     try {
@@ -92,8 +92,8 @@ export class AuthService {
   checkAuthStatus(user: User) {
     return {
       ...user,
-      token: this.getJwtToken({ id: user.id })
-    }
+      token: this.getJwtToken({ id: user.id }),
+    };
   }
 
   private getJwtToken(payload: JwtPayload) {
@@ -113,7 +113,7 @@ export class AuthService {
       typeof error === 'object' &&
       error !== null &&
       'code' in error &&
-      typeof (error as { code: unknown }).code === 'string'
+      typeof error.code === 'string'
     );
   }
 }
