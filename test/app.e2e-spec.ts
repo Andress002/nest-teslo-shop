@@ -6,12 +6,10 @@ import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 
 interface AuthResponseBody {
-  user: {
-    id: string;
-    email: string;
-    fullName: string;
-    rol: string[];
-  };
+  id: string;
+  email: string;
+  fullName: string;
+  rol: string[];
   token: string;
 }
 
@@ -48,10 +46,10 @@ describe('Teslo Shop (e2e)', () => {
         .expect(201);
 
       const registerBody = registerRes.body as AuthResponseBody;
-      expect(registerBody.user).toBeDefined();
+      expect(registerBody.email).toBe(testUser.email);
+      expect(registerBody.fullName).toBe(testUser.fullName);
       expect(registerBody.token).toBeDefined();
-      expect(registerBody.user.email).toBe(testUser.email);
-      expect(registerBody.user.fullName).toBe(testUser.fullName);
+      expect(registerBody.rol).toBeDefined();
 
       // Login with same credentials
       const loginRes = await request(app.getHttpServer())
@@ -63,9 +61,8 @@ describe('Teslo Shop (e2e)', () => {
         .expect(202);
 
       const loginBody = loginRes.body as AuthResponseBody;
-      expect(loginBody.user).toBeDefined();
+      expect(loginBody.email).toBe(testUser.email);
       expect(loginBody.token).toBeDefined();
-      expect(loginBody.user.email).toBe(testUser.email);
     });
   });
 });
