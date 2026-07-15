@@ -8,6 +8,6 @@
   },
   "transformIgnorePatterns": ["node_modules/(?!(uuid|.pnpm))"],
   "moduleNameMapper": {
-    "^src/(.*)$": "<rootDir>/src/$1"
+    "^src/(.*)$": "<rootDir>/../src/$1"
   }
 }
