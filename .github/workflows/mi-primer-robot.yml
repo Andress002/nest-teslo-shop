@@ -2,9 +2,9 @@ name: Control de Calidad - NestJS Backend (pnpm)
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -13,14 +13,14 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  DB_HOST: localhost
-  DB_PORT: 5432
-  DB_USERNAME: postgres
-  DB_PASSWORD: postgres
-  DB_NAME: teslo_shop_test
-  JWT_SECRET: test_jwt_secret_key_123
-  JWT_EXPIRES_IN: 2h
+env: # la etiqueta env se usa cuando se definen variables que estas utilizando en tu codigo, a diferencia del with que se usa cuando estas usando variables que no estan corriendo en mi codigo
+  DB_HOST: ${{ vars.DB_HOST }}
+  DB_PORT: ${{ vars.DB_PORT }}
+  DB_USERNAME: ${{ vars.DB_USERNAME }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  DB_NAME: ${{ vars.DB_NAME }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  JWT_EXPIRES_IN: '2h'
   BCRYPT_SALT_ROUNDS: 10
   PORT: 3005
 
@@ -44,28 +44,31 @@ jobs:
           --health-retries 5
 
     steps:
-      - name: Copiando el codigo del repositorio
+      - name: Copiando el codigo del repositiro
         uses: actions/checkout@v4
 
+      - name: Habilitando pnpm via Corepack
+        run: |
+            corepack enable
+            corepack prepare pnpm@latest --activate
+
       - name: Instalando Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
-
-      - name: Habilitando pnpm via Corepack
-        run: corepack enable
+          cache: 'pnpm'
 
       - name: Instalando librerias con pnpm
         run: pnpm install --frozen-lockfile
 
       - name: Verificando codigo con ESLint
-        run: pnpm lint
+        run: pnpm run lint
 
-      - name: Compilando el proyecto (Nest Build)
-        run: pnpm build
+      - name: Copilando el proyecto (Nest Build)
+        run: pnpm run build
 
       - name: Ejecutando pruebas unitarias
-        run: pnpm test
+        run: pnpm run test
 
       - name: Ejecutando pruebas e2e
-        run: pnpm test:e2e
+        run: pnpm run test:e2e
